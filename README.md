@@ -1,4 +1,4 @@
-# GPX File Viewer
+# GPX File Modifier
 
 This is a simple web-based tool that allows users to upload a `.gpx` file and change the total time while still having a valid
 file.

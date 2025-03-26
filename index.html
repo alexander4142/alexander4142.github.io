@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPX File Upload</title>
+
+    <style>
+        #duration, #targetText, #targetBox, #enter, #download {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <h1>Upload a GPX File</h1>
     <input type="file" id="gpxFile" accept=".gpx">
-    <pre id="output"></pre>
+    <p id="duration">Duration of your activity: </p>
+    <p id="targetText">Enter target duration (hh:mm:ss)</p>
+    <input type="text" id="targetBox">
+    <input type="button" id="enter" value="Enter">
+    <input type="button" id="download" value="Download GPX File">
 
+    <script src='https://cdn.jsdelivr.net/npm/big.js@6.2.2/big.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

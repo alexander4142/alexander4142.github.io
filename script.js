@@ -24,6 +24,8 @@ document.getElementById("enter").addEventListener("click", function() {
     const splineLat = numeric.spline(gpxData["times"], gpxData["lats"], 0, 0);
     const splineLong = numeric.spline(gpxData["times"], gpxData["longs"], 0, 0);
     const splineElevation = numeric.spline(gpxData["times"], gpxData["elevations"], 0, 0);
+    const splineHeartRate = gpxData["heartRates"].length > 0 ? numeric.spline(gpxData["times"], gpxData["heartRates"], 0, 0) : null;
+    const splineCadence = gpxData["cadences"].length > 0 ? numeric.spline(gpxData["times"], gpxData["cadences"], 0, 0) : null;
 
     segment = xmlDoc.getElementsByTagName("trkseg")[0];
     removeAllChildren(segment);
@@ -35,6 +37,8 @@ document.getElementById("enter").addEventListener("click", function() {
         const lat = splineLat.at(time2);
         const long = splineLong.at(time2);
         const elevation = splineElevation.at(time2);
+        const heartRate = splineHeartRate ? splineHeartRate.at(time2) : null;
+        const cadence = splineCadence ? splineCadence.at(time2) : null;
         
         const newNode = xmlDoc.createElement("trkpt");
         newNode.setAttribute("lat", lat.toString());
@@ -45,6 +49,23 @@ document.getElementById("enter").addEventListener("click", function() {
 
         const newTime = xmlDoc.createElement("time");
         newTime.textContent = new Date(time).toISOString();
+
+        if (heartRate || cadence) {
+            const extensions = xmlDoc.createElement("extensions");
+            const tpe = xmlDoc.createElement("ns3:TrackPointExtension");
+            if (heartRate) {
+                const newHeartRate = xmlDoc.createElement("ns3:hr");
+                newHeartRate.textContent = Math.round(heartRate).toString();
+                tpe.appendChild(newHeartRate);
+            }
+            if (cadence) {
+                const newCadence = xmlDoc.createElement("ns3:cad");
+                newCadence.textContent = cadence.toString();
+                tpe.appendChild(newCadence);
+            }
+            extensions.appendChild(tpe);
+            newNode.appendChild(extensions);
+        }
 
         newNode.appendChild(newElevation);
         newNode.appendChild(newTime);
@@ -117,10 +138,14 @@ function parseGPX(gpxText) {
     const trackPoints = xmlDoc.getElementsByTagName("trkpt");
     const elevation = xmlDoc.getElementsByTagName("ele");
     const time = xmlDoc.getElementsByTagName("time");
+    const heartRate = xmlDoc.getElementsByTagName("ns3:hr");
+    const cadence = xmlDoc.getElementsByTagName("ns3:cad");
     let lats = [];
     let longs = [];
     let elevations = [];
     let times = [];
+    let heartRates = [];
+    let cadences = [];
 
     // Turn the data into a format that the spline function can use
     for (let i = 0; i < trackPoints.length; i++) {
@@ -130,6 +155,12 @@ function parseGPX(gpxText) {
         longs.push(parseFloat(lon));
         elevations.push(parseFloat(elevation[i].textContent));
         times.push(new Date(time[i].textContent).getTime());
+        if (heartRate.length > 0) {
+            heartRates.push(parseInt(heartRate[i].textContent));
+        }
+        if (cadence.length > 0) {
+            cadences.push(parseInt(cadence[i].textContent));
+        }
     }
 
     // Calculate and display total duration
@@ -142,5 +173,5 @@ function parseGPX(gpxText) {
     document.getElementById("targetBox").style.display = "block";
     document.getElementById("enter").style.display = "block";
 
-    return {"lats": lats, "longs": longs, "elevations": elevations, "times": times};
+    return {"lats": lats, "longs": longs, "elevations": elevations, "times": times, "heartRates": heartRates, "cadences": cadences};
 }
